@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#b8e1fa">
+<title>Sana Birkaç Soru</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Montserrat:wght@400;500;600&display=swap');
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Montserrat,sans-serif}
+body{min-height:100vh;overflow-x:hidden;overflow-y:auto;color:#315c8e;background:radial-gradient(circle at 50% 40%,#fff9,transparent 42%),linear-gradient(#b8e1fa,#dff3ff)}
+.daisies{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.d{position:absolute;width:var(--s);height:var(--s);opacity:var(--o);transform:rotate(var(--r));filter:drop-shadow(0 4px 7px #4682aa14)}
+.p{position:absolute;width:25%;height:47%;left:37.5%;top:3%;border-radius:60% 60% 48% 48%;background:#fffff2;transform-origin:50% 100%}
+.p:nth-child(1){transform:rotate(0)}.p:nth-child(2){transform:rotate(45deg)}.p:nth-child(3){transform:rotate(90deg)}.p:nth-child(4){transform:rotate(135deg)}.p:nth-child(5){transform:rotate(180deg)}.p:nth-child(6){transform:rotate(225deg)}.p:nth-child(7){transform:rotate(270deg)}.p:nth-child(8){transform:rotate(315deg)}
+.c{position:absolute;width:24%;height:24%;left:38%;top:38%;border-radius:50%;background:#f6d37a}
+.screen{position:relative;z-index:2;min-height:100vh;width:100%;display:none;align-items:center;justify-content:center;padding:20px;animation:fade .4s ease}
+.screen.active{display:flex}
+@keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.card{width:min(760px,calc(100vw - 34px));min-height:min(560px,calc(100vh - 40px));padding:clamp(42px,7vw,78px) clamp(24px,7vw,72px);background:#ffffffe0;border:1px solid #ffffffd4;border-radius:38px;box-shadow:0 18px 50px #4687b92e;backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.heart{width:42px;height:42px;margin-bottom:20px;color:#78b9e9}
+.heart svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.question{margin:0;max-width:680px;font-family:"DM Serif Display",Georgia,serif;font-size:clamp(2.2rem,5.8vw,4.2rem);line-height:1.18;font-weight:400;color:#315c8e}
+.divider{width:min(280px,70%);display:flex;align-items:center;gap:14px;margin:30px 0 34px}
+.divider:before,.divider:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,#a8d7f4)}
+.divider:after{background:linear-gradient(90deg,#a8d7f4,transparent)}
+.divider span{color:#a7d8f6}
+.answers{width:min(570px,100%);min-height:105px;display:flex;gap:24px;justify-content:center;align-items:center;position:relative}
+.answer{min-width:190px;min-height:76px;padding:15px 34px;border:1px solid #ffffffeb;border-radius:28px;background:#fffffff0;color:#315c8e;font-family:"DM Serif Display",Georgia,serif;font-size:1.75rem;cursor:pointer;box-shadow:0 8px 22px #468cbe21;transition:transform .28s cubic-bezier(.22,1,.36,1),font-size .28s,opacity .28s;touch-action:manipulation;user-select:none}
+.answer.correct{background:linear-gradient(#c8e8ff,#afdafa)}
+.answer:active{transform:scale(.97)}
+.answers.running::after{content:"";display:block;min-width:190px;min-height:76px}
+.answers.running .wrong{position:absolute;left:75%;top:50%;margin:0;transform:translate(-50%,-50%)}
+.mood-card{width:min(1080px,calc(100vw - 34px));min-height:auto;padding:clamp(30px,5vw,58px) clamp(20px,4vw,48px);background:#ffffffe0;border:1px solid #ffffffd4;border-radius:38px;box-shadow:0 18px 50px #4687b92e;backdrop-filter:blur(10px);text-align:center}
+.mood-title{margin:0;font:400 clamp(2.1rem,5vw,3.5rem)/1.2 "DM Serif Display",Georgia,serif;color:#315c8e}
+.mood-options{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:28px}
+.mood-option{border:1px solid #ffffffeb;border-radius:28px;background:#fffffff2;color:#315c8e;padding:24px 18px;font:400 clamp(1.35rem,2.5vw,1.7rem) "DM Serif Display",Georgia,serif;cursor:pointer;box-shadow:0 8px 22px #468cbe21;transition:transform .2s,box-shadow .2s}
+.mood-option:hover{transform:translateY(-3px);box-shadow:0 12px 28px #468cbe2e}
+.mood-icon{display:block;font-family:Arial,sans-serif;font-size:2rem;margin-bottom:10px}
+.mood-detail{width:min(760px,calc(100vw - 34px));min-height:auto;padding:clamp(30px,5vw,58px) clamp(22px,5vw,58px);background:#ffffffe6;border:1px solid #ffffffd4;border-radius:38px;box-shadow:0 18px 50px #4687b92e;backdrop-filter:blur(10px);text-align:center}
+.mood-detail-title{margin:0 0 22px;font:400 clamp(2rem,5vw,3.2rem)/1.2 "DM Serif Display",Georgia,serif;color:#315c8e}
+.mood-text{font-size:1rem;line-height:1.85;color:#42698f;margin:0 auto;max-width:640px}
+.mood-photo{width:100%;max-width:570px;display:block;max-height:560px;object-fit:cover;border-radius:26px;box-shadow:0 12px 30px #468cbe26;margin:26px auto 0}
+.mood-actions{display:flex;justify-content:center;margin-top:28px}
+.mood-action{display:inline-flex;align-items:center;justify-content:center;gap:9px;text-decoration:none;border:1px solid #ffffffeb;border-radius:22px;background:linear-gradient(#8ac5f3,#69afe8);color:white;padding:15px 24px;min-width:245px;font:500 1.1rem Montserrat,sans-serif;box-shadow:0 8px 22px #468cbe26;cursor:pointer}
+.back-btn{margin-top:20px;border:0;background:transparent;color:#679ac6;font:500 .95rem Montserrat,sans-serif;cursor:pointer}
+.playlist-card{max-width:560px;margin:28px auto 0;border:1px solid #ffffffdd;border-radius:26px;background:#fff;overflow:hidden;box-shadow:0 12px 30px #468cbe20;text-align:left}
+.playlist-card img{width:100%;display:block;aspect-ratio:1/1;object-fit:cover}
+.playlist-body{padding:22px 22px 24px}
+.playlist-text{font-size:1rem;line-height:1.75;color:#42698f;margin:0 0 18px}
+.final{overflow:visible;align-items:flex-start;padding:24px 14px}
+.final-card{width:min(760px,calc(100vw - 24px));margin:auto;padding:clamp(24px,5vw,52px);background:#ffffffe6;border:1px solid #ffffffdd;border-radius:34px;box-shadow:0 18px 50px #4687b92e;backdrop-filter:blur(10px)}
+.question-note{margin:-16px auto 22px;max-width:620px;color:#6794b9;font-size:.78rem;line-height:1.45;font-style:italic}.next-page-wrap{text-align:center;margin-top:34px}.next-page{border:1px solid #ffffffeb;border-radius:22px;background:linear-gradient(#8ac5f3,#69afe8);color:white;padding:14px 24px;font:500 1rem Montserrat,sans-serif;box-shadow:0 8px 22px #468cbe26;cursor:pointer}
+.final-card .heart{margin:0 auto 18px}
+.photo{width:100%;display:block;max-height:620px;object-fit:cover;border-radius:26px;box-shadow:0 12px 30px #468cbe26;margin-bottom:30px}
+.final-title{text-align:center;font:400 clamp(2rem,5vw,3rem) "DM Serif Display",Georgia,serif;color:#315c8e;margin:0 0 28px}
+.text{font-size:1rem;line-height:1.85;color:#42698f}.text p{margin:0 0 24px}.sign{text-align:center;font:400 1.55rem "DM Serif Display",Georgia,serif;color:#315c8e;margin:32px 0 0;padding-top:24px;border-top:1px solid #78b9e959}
+@media(max-width:700px){
+ .screen{padding:12px}
+ .card{width:calc(100vw - 34px);min-height:auto;padding:38px 18px;border-radius:30px;margin:12px 0}
+ .question{font-size:clamp(2rem,9.5vw,3rem)}.question-note{font-size:.72rem;margin:-10px auto 18px}
+ .answers{gap:12px;min-height:120px}.answer{min-width:0;width:44%;min-height:68px;padding:12px 18px;font-size:1.45rem}.answers.running::after{min-width:44%;min-height:68px}.intro-note{width:44%;font-size:.72rem}
+ .final{padding:12px}.final-card{padding:24px 18px 30px;border-radius:28px}.photo{border-radius:22px;max-height:none}.text{font-size:.94rem;line-height:1.8}
+ .d{opacity:calc(var(--o)*.72)}
+ .answers.running .wrong{left:76%}
+.intro-note{
+  width:44%;
+  margin:-2px auto 2px;
+  text-align:center;
+  font-size:.78rem;
+  line-height:1.35;
+  color:rgba(55,92,118,.72);
+  font-style:italic;
+}
+ .mood-card,.mood-detail{width:calc(100vw - 24px);border-radius:28px;padding:28px 16px}
+ .mood-options{grid-template-columns:1fr;gap:12px}.mood-option{padding:17px 15px}
+ .mood-photo{border-radius:22px;max-height:none}.playlist-card{border-radius:22px}.playlist-body{padding:18px}
+}
+</style>
+</head>
+<body>
+<div class="daisies">
+  <div class="d" style="--s:150px;--o:.85;--r:-10deg;left:-35px;top:2%"><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="c"></i></div>
+  <div class="d" style="--s:105px;--o:.72;--r:12deg;right:3%;top:7%"><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="c"></i></div>
+  <div class="d" style="--s:92px;--o:.55;--r:-25deg;left:6%;bottom:9%"><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="c"></i></div>
+  <div class="d" style="--s:135px;--o:.72;--r:18deg;right:-22px;bottom:4%"><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="c"></i></div>
+  <div class="d" style="--s:78px;--o:.48;--r:5deg;left:18%;top:-15px"><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="c"></i></div>
+  <div class="d" style="--s:72px;--o:.48;--r:-8deg;right:20%;bottom:-8px"><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="c"></i></div>
+  <div class="d" style="--s:64px;--o:.46;--r:28deg;left:48%;top:4%"><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="p"></i><i class="c"></i></div>
+</div>
+
+<section id="intro" class="screen active"><main class="card">
+  <div class="heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+  <h1 class="question">Hâlâ buraya uğruyor musun :) ?</h1>
+  <div class="divider"><span>♥</span></div>
+  <div class="intro-actions answers">
+    <button class="answer" id="goQuestions">Birkaç soruya cevap vermek istiyorum</button>
+    <div class="intro-note">(Sonlara doğru yeni sorular var.)</div>
+    <button class="answer" id="goMood">Bugün nasıl hissediyorum?</button>
+  </div>
+</main></section>
+
+<section id="qs" class="screen"><main class="card">
+  <div class="heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+  <h1 class="question" id="qt"></h1>
+  <div class="divider"><span>♥</span></div>
+  <p class="question-note" id="questionNote"></p>
+  <div class="answers" id="qa"><button class="answer correct" id="yes">Evet</button><button class="answer wrong" id="no">Hayır</button></div>
+</main></section>
+
+<section id="mood" class="screen"><main class="mood-card">
+  <div class="heart" style="margin:0 auto 14px"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+  <h1 class="mood-title">Bugün nasıl hissediyorsun?</h1>
+  <div class="divider" style="margin:24px auto 22px"><span>♥</span></div>
+  <div class="mood-options">
+    <button class="mood-option" data-mood="bad"><span class="mood-icon">🌧️</span>Biraz kötüyüm</button>
+    <button class="mood-option" data-mood="okay"><span class="mood-icon">☁️</span>İdare ediyorum</button>
+    <button class="mood-option" data-mood="good"><span class="mood-icon">🌸</span>İyiyim</button>
+  </div>
+  <button class="back-btn" id="moodBack">← Girişe dön</button>
+</main></section>
+
+<section id="moodBad" class="screen"><article class="mood-detail">
+  <div class="heart" style="margin:0 auto 14px"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+  <h1 class="mood-detail-title">Biraz kötüyüm</h1>
+  <p class="mood-text">Tamam, bugün biraz zorlanıyor olabilirsin. Unutma, her şeyi bugün çözmek zorunda değilsin. Bugün sadece biraz dinlenmeye ihtiyacın vardır belki. Bazı günler hiçbir şeyi düzeltmeye çalışmadan sadece günü geçirmek bile yeterince büyük bir şeydir canım. Yanında olsaydım direkt sana vermek isterdim ama şimdilik, belki biraz olsun seni güldüreceğini düşündüğüm bu fotoğrafımla papatyalarını sana teslim ediyorum.</p>
+  <img class="mood-photo" src="papatyali-fotograf.jpeg" alt="Papatyalarla çekilmiş bir fotoğraf">
+  <button class="back-btn moodHome">← Diğer seçeneklere dön</button>
+</article></section>
+
+<section id="moodOkay" class="screen"><article class="mood-detail">
+  <div class="heart" style="margin:0 auto 14px"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+  <h1 class="mood-detail-title">İdare ediyorum</h1>
+  <p class="mood-text">Bugün idare ediyorsan ben de bugün sana biraz eşlik edeyim. Her şeyi konuşmak, çözmek ya da düzeltmek zorunda değiliz. Bazen sadece birinin yanında olduğunu bilmek yeter.</p>
+  <div class="mood-actions"><a class="mood-action" href="https://wa.me/905432615461?text=Bugün%20biraz%20eşliğe%20ihtiyacım%20var.%20🩵" target="_blank" rel="noopener">💬 Sana biraz eşlik edeyim</a></div>
+  <button class="back-btn moodHome">← Diğer seçeneklere dön</button>
+</article></section>
+
+<section id="moodGood" class="screen"><article class="mood-detail">
+  <div class="heart" style="margin:0 auto 14px"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+  <h1 class="mood-detail-title">İyiyim</h1>
+  <p class="mood-text">Bunu duyduğuma sevindim. O zaman iyi olmanın yanında seni biraz da mutlu edebilecek küçük bir şey bırakıp kaçacağım :).</p>
+  <div class="playlist-card">
+    <img src="playlist-gorsel.png" alt="Playlist için papatya görseli">
+    <div class="playlist-body">
+      <p class="playlist-text">Belki bu şarkıları dinlemek bazı şeyleri benden daha güzel anlatır. Umarım beğenirsin canım.</p>
+      <a class="mood-action" style="width:100%;min-width:0" href="https://open.spotify.com/playlist/1j3mwroHfaxD2VObykImuZ" target="_blank" rel="noopener">🎧 Playlisti aç</a>
+    </div>
+  </div>
+  <button class="back-btn moodHome">← Diğer seçeneklere dön</button>
+</article></section>
+
+<section id="newFinal" class="screen final"><article class="final-card">
+  <div class="heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+  <img class="photo" src="yeni-final-fotograf.jpeg" alt="">
+  <h1 class="final-title">Merhaba tekrardan özel lovebombingcin burada :D</h1>
+  <div class="text">
+    <p>Yaptığım bu siteyi hala ziyaret ediyor olmana gerçekten inanamıyorum bu durum beni aşırı mutlu etti ve yaptığım bir şeye bir insan tarafından bu kadar değer verildiğini görünce ben de karşılıksız bırakmak istemedim ve yeniden içimden geçenleri yazarak yeni şeyler eklemek istedim. Neredeyse aradan 1 hafta geçti ve bu süreçte yeni şeyler oldu. Gerçekten bir date'imiz var ve bu beni çok heyecanlandırıyor. Burada sana şunu yapacağım, bunu yapacağım şöyle olacak böyle olacak şeklinde şeyler yazmayacağım çünkü zaten artık bazı şeyleri konuşarak değil yaşayarak anlayacağımız bir noktada olduğumuzu düşünüyorum canım.</p>
+    <p>Geçen hafta sana "bir gün iyi ki pes etmemişim diyeceğiz" demiştim. Şimdi dönüp baktığımda geçen haftaki o soruların bazılarına bugün başka cevaplar verebildiğimizi görmek beni ayrıca mutlu ediyor. Belki hayatındaki bütün sorunlar bir anda çözülmedi, belki hala yorulduğun, canının sıkıldığı günler oluyor ama artık arada güzel bir şey olduğunda onu paylaşabildiğin, birlikte gülebildiğin, seni gerçekten merak eden birinin olduğunu biliyorsun.</p>
+    <p>Ben de seni tanımaya devam ederken şunu fark ediyorum, sana karşı hissettiğim şey sadece sana güzel söyler söylemekten ya da seni iyi hissettirmeye çalışmaktan ibaret değil. Seni gerçekten merak ediyorum. Gününün nasıl geçtiğini, neye güldüğünü, neye sinirlendiğini, hangi şarkıyı neden sevdiğini, hangi şeylere çocuk gibi sevindiğini öğrenmek istiyorum ve çoğunu da öğrendim. Hatta bazen hayatında hiçbir önemli olmayan saçma sapan şeyleri bile anlatmanı istiyorum. Çünkü sanırım insan birini merak etmeye başladığında onun hayatındaki küçük şeyler de kendiliğinden önemli hale geliyor. Görüntülü konuşurken hiçbir şey demeden sana bakarak sırıttığımda senin de gülümsemeni görmek hoşuma gidiyor, sana iltifat ettiğimde utanman hoşuma gidiyor, gamzemle ilgili yorum yapman hoşuma gidiyor, bir anda attığın ses kayıtları, sabahları attığın ve benim seni görerek gözümü açmamı sağlayan fotoğraflı günaydın mesajların çok hoşuma gidiyor.</p>
+    <p>Bir de şu lovebombing meselesini unuttuğumu sanma :D Belki şu anda bu mesajları okurken, yaptığım playlisti gördüğünde, bu çocuk yine ne yapıyor diye düşünüyorsundur. Ama sanırım artık bunun cevabını sana anlatmama gerek yok. Benim yaptığım tek şey gerçekten olduğum kişi olarak kalmak.</p>
+    <p>Cumartesi günü de umarım bunun güzel bir devamı olacak. Büyük beklentiler, kusursuz bir plan veya hayatımızın en unutulmaz günü olsun gibi bir derdim asla yok. Sadece seni karşıma alıp gerçekten tanımak, beraber gülmek, saçmalamak, konuşmak ve o güne ait küçük bir anımız olsun istiyorum.</p>
+    <p>Geçen hafta bu siteyi yaparken sana biraz umut bırakmak istemiştim. Bu hafta ise fark ettim ki sen bana da güzel bir şey bıraktın. Seni tanımaya devam etmek için kocaman bir merak.</p>
+    <p class="sign">Ve evet, bu cumartesi gerçekten date'imiz varrrr...</p>
+  </div>
+  <div class="next-page-wrap"><button class="next-page" id="nextFinal">Sonraki sayfa →</button></div>
+</article></section>
+
+<section id="final" class="screen final"><article class="final-card">
+  <div class="heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+  <img class="photo" src="final-fotograf.jpeg" alt="">
+  <h1 class="final-title">Bir şey söylemek istiyorum...</h1>
+  <div class="text">
+    <p>Öncelikle sitemi ziyaret ettiğin için teşekkür ederim. Seni biraz zorlamış olabilirim bazı sorularda bunun için de üzgünüm fakat bugün biraz olsun gülümsemeni istedim. Soruları gördüğünde de güldüğüne eminim :).</p>
+    <p>KPSS kazanılır mı bilmiyorum, borçların ne zaman biteceğini bilmiyorum, evdeki sorunların ne zaman çözüleceğini de bilmiyorum. Ama bildiğim bir şey var, o da bütün bunların şu anda hayatının tamamı olmadığı. Gerçekten seni çok zorluyor ve yoruluyorsun, bunun da farkındayım. Bu yüzden sana dışarıdan akıl verip de seni daha çok zorlamak istemiyorum ama senin için her şeyin en iyisini diliyorum. Biraz daha dayan, biraz daha dene, biraz da kendin için yaşa. Bugün pes etmeyip yarın bir kez daha deneyeceğiz. Bir gün "iyi ki pes etmemişim" diyeceğiz.</p>
+    <p>Bu arada bahsetmeden geçmek istemedim. Bana iltifat sevmediğini söylemiştin fakat senin adına üzgünüm ki sana iltifat etmek benim hobim oldu. Sana iltifat ettiğimde bu fotoğraftaki gibi sırıtmanı, utanmanı çok seviyorum. Bazen belki seni çok darlıyorumdur bilmiyorum ama seninle konuşurken çenem düşüyor. Seninle ilgili her şeyi merak ediyorum, öğrenmek istiyorum.</p>
+    <p>Geçenlerde bir şiir görmüştüm. “Kavmime peygamber gelse ilk Leyla'ya anlatmak isterdim, annem şiir gibi bir hırka örse, muhakkak ilk Leyla'da görmek isterdim.” diyordu. Bahsettiği Leyla benim için sanırım sensin, O cümleyi gördüğümde biraz seni düşündüm. Çünkü ben de hayatımda olan şeyleri seninle paylaşmak istiyorum. Neyin olduğu hiç önemli değil; vantilatörüm bozulsa, gelip sana anlatmak isterim. Yolda yürürken güzel bir kıyafet görsem, seni onun içinde görmek isterim. Gün içinde saçma sapan bir şey oluyor, ilk sana anlatmak geliyor içimden. Güzel bir şey olduğunda da, canımı sıkan bir şey olduğunda da aklıma gelmeni seviyorum.</p>
+    <p>Galiba bütün bunların anlatmak istediği şey şu: Hayatındaki bütün sorunları çözemem, sana her şeyin düzeleceğine dair söz de veremem. Ama hayatının sadece bu zor günlerden ibaret olmadığını sana hatırlatabilecek insanlardan biri olmak isterim. Bana yaslanabilirsin, benim dağ olmaya merakım var.</p>
+    <p class="sign">Ve unutmadan, Cumartesi günü bir randevun var.</p>
+  </div>
+</article></section>
+
+<script>
+const questions=[
+"Bugün biraz olsun gülümsemeyi hak ediyor musun ?",
+"Yarın yeniden denemeye var mısın ?",
+"KPSS'yi kazanabilmek için elinden geleni yapacak mısın ?",
+"İstediğin hayatı kurmak için elinden geleni yapacak mısın ?",
+"Beyaz papatyalar hâlâ güzel değil mi ?",
+"Peki şimdi biraz gülümser misin ?",
+"Bir gün sana gerçekten papatya almama izin verir misin ?",
+"Benimle konuşurken bazen yüzünde istemsiz bir gülümseme oluşuyor mu?",
+"Beni tanımaya devam etmek ister misin?",
+"Cumartesi günü bol bol gülmeye hazır mısın?",
+"Peki… cumartesi günü bu hikâyenin yeni bir sayfasını birlikte açmaya var mısın?"
+];
+
+const screens=[
+ document.getElementById("intro"),document.getElementById("qs"),
+ document.getElementById("mood"),document.getElementById("moodBad"),
+ document.getElementById("moodOkay"),document.getElementById("moodGood"),document.getElementById("newFinal"),
+ document.getElementById("final")
+];
+const qs=document.getElementById("qs"), fin=document.getElementById("final");
+const qa=document.getElementById("qa"), yes=document.getElementById("yes"), no=document.getElementById("no"), qt=document.getElementById("qt"), questionNote=document.getElementById("questionNote");
+const goQuestions=document.getElementById("goQuestions"), goMood=document.getElementById("goMood");
+const mood=document.getElementById("mood"), moodBack=document.getElementById("moodBack");
+
+let i=0,wrong=0;
+
+function show(screen){
+  screens.forEach(s=>s.classList.remove("active"));
+  screen.classList.add("active");
+  window.scrollTo({top:0,behavior:"instant"});
+}
+
+function resetQuestion(){
+  qa.classList.remove("running");
+  wrong=0;
+  [yes,no].forEach(b=>{
+    b.style.transform="";
+    b.style.fontSize="";
+    b.style.opacity="";
+    b.style.left="";
+    b.style.top="";
+    b.style.marginLeft="";
+    b.style.marginTop="";
+  });
+}
+
+function loadQuestion(){
+  qt.textContent=questions[i];
+  questionNote.textContent=i>=7 ? "(Bu soruda içinden ne geliyorsa onu seçebilirsin. Hayır tuşu hareket etmeyecek.)" : "";
+  resetQuestion();
+}
+
+function escapeButton(area,correct,wrongBtn){
+  wrong++;
+  area.classList.add("running");
+  const ws=Math.max(.32,1-wrong*.115);
+  const cs=Math.min(1.55,1+wrong*.10);
+  const ar=area.getBoundingClientRect();
+  const br=wrongBtn.getBoundingClientRect();
+  const baseX=ar.width*.75;
+  const maxX=Math.max(8,ar.width*.16);
+  const maxY=Math.max(12,Math.min(42,(ar.height-br.height)/2+18));
+  const x=(Math.random()*2-1)*maxX;
+  const y=(Math.random()*2-1)*maxY;
+  wrongBtn.style.left=baseX+"px";
+  wrongBtn.style.top="50%";
+  wrongBtn.style.marginLeft=(-br.width/2)+"px";
+  wrongBtn.style.marginTop=(-br.height/2)+"px";
+  wrongBtn.style.transform=`translate(${x}px,${y}px) scale(${ws})`;
+  wrongBtn.style.fontSize=(1.75*ws)+"rem";
+  wrongBtn.style.opacity=wrong>5?".62":"1";
+  correct.style.transform=`scale(${cs})`;
+}
+
+goQuestions.onclick=()=>{i=0;loadQuestion();show(qs)};
+goMood.onclick=()=>show(mood);
+moodBack.onclick=()=>show(document.getElementById("intro"));
+
+document.querySelectorAll(".mood-option").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const target={bad:"moodBad",okay:"moodOkay",good:"moodGood"}[btn.dataset.mood];
+    show(document.getElementById(target));
+  });
+});
+document.querySelectorAll(".moodHome").forEach(btn=>btn.onclick=()=>show(mood));
+
+no.onclick=e=>{
+  e.preventDefault();
+  if(i>=7){
+    i++;
+    if(i>=questions.length) show(document.getElementById("newFinal"));
+    else loadQuestion();
+  } else {
+    escapeButton(qa,yes,no);
+  }
+};
+yes.onclick=()=>{
+  i++;
+  if(i>=questions.length) show(document.getElementById("newFinal"));
+  else loadQuestion();
+};
+document.getElementById("nextFinal").onclick=()=>show(fin);
+</script>
+</body></html>
