@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#c8eafb">
+<title>Çocukluk Albümü — Sıfırdan Prototip</title>
+<style>
+:root{
+  --blue:#c8eafb;
+  --blue2:#edf9ff;
+  --ink:#315c7c;
+  --wood1:#e7caa7;
+  --wood2:#d8b48d;
+  --wood3:#c6986b;
+  --black:#171717;
+  --black2:#242424;
+  --cream:#f5efe5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  min-height:100vh;
+  overflow-x:hidden;
+  font-family:Arial,Helvetica,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 15% 11%,rgba(255,255,255,.92),transparent 15%),
+    radial-gradient(circle at 86% 17%,rgba(255,255,255,.58),transparent 18%),
+    linear-gradient(180deg,var(--blue),var(--blue2));
+}
+button{font:inherit}
+
+.scene{
+  min-height:100svh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding:56px 6px 22px;
+  position:relative;
+}
+.header{
+  position:relative;
+  z-index:5;
+  text-align:center;
+  margin-bottom:12px;
+}
+.header h1{
+  margin:0 0 6px;
+  font-family:Georgia,"Times New Roman",serif;
+  font-weight:400;
+  font-size:clamp(2rem,7vw,3.6rem);
+  line-height:1;
+  color:#315c7c;
+}
+.header p{
+  margin:0 auto;
+  width:min(94vw,680px);
+  font-size:clamp(.72rem,2.4vw,.92rem);
+  line-height:1.5;
+  color:#507b98;
+}
+
+.back{
+  position:fixed;
+  top:max(12px,env(safe-area-inset-top));
+  left:12px;
+  z-index:300;
+  border:1px solid rgba(255,255,255,.9);
+  background:rgba(255,255,255,.72);
+  color:#315c7c;
+  border-radius:999px;
+  padding:9px 13px;
+  box-shadow:0 6px 18px rgba(45,90,120,.12);
+  backdrop-filter:blur(10px);
+}
+
+/* Same visual language as the original site: baby blue + white daisies */
+.daisy{
+  position:fixed;
+  z-index:0;
+  width:94px;height:94px;
+  opacity:.55;
+  pointer-events:none;
+}
+.daisy.a{left:-22px;top:2%;transform:rotate(-13deg)}
+.daisy.b{right:-25px;bottom:4%;transform:rotate(17deg) scale(.86)}
+.daisy .petal{
+  position:absolute;left:38%;top:3%;width:24%;height:48%;
+  border-radius:60% 60% 48% 48%;
+  background:#fff;
+  transform-origin:50% 100%;
+  box-shadow:0 2px 8px rgba(75,125,155,.08);
+}
+.daisy .petal:nth-child(1){transform:rotate(0)}
+.daisy .petal:nth-child(2){transform:rotate(45deg)}
+.daisy .petal:nth-child(3){transform:rotate(90deg)}
+.daisy .petal:nth-child(4){transform:rotate(135deg)}
+.daisy .petal:nth-child(5){transform:rotate(180deg)}
+.daisy .petal:nth-child(6){transform:rotate(225deg)}
+.daisy .petal:nth-child(7){transform:rotate(270deg)}
+.daisy .petal:nth-child(8){transform:rotate(315deg)}
+.daisy .center{
+  position:absolute;left:38%;top:38%;width:24%;height:24%;
+  border-radius:50%;background:#efce65;
+}
+
+/* ============================================================
+   ALBUM GEOMETRY
+   - The album has one permanent open geometry.
+   - Closed state merely moves that geometry so the closed cover
+     is centered. Nothing is resized/squeezed.
+   - Every sheet stays in the DOM permanently. No sheet is ever
+     deleted/recreated after a turn, so there is no teleport.
+============================================================ */
+.stage{
+  position:relative;
+  z-index:3;
+  width:min(99vw,920px);
+  aspect-ratio:1.22/1;
+  perspective:2600px;
+  touch-action:none;
+  filter:drop-shadow(0 25px 34px rgba(40,65,82,.22));
+}
+.book{
+  position:absolute;
+  inset:0;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+
+/* two wooden back boards */
+.board{
+  position:absolute;
+  top:5%;bottom:5%;
+  width:48%;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 23% 25%,rgba(255,255,255,.18),transparent 12%),
+    radial-gradient(circle at 74% 62%,rgba(255,255,255,.12),transparent 15%),
+    repeating-linear-gradient(94deg,rgba(116,73,40,.12) 0 2px,transparent 2px 66px),
+    linear-gradient(135deg,var(--wood1),var(--wood2) 50%,var(--wood3));
+  box-shadow:
+    inset 0 0 0 1px rgba(99,64,37,.17),
+    inset 0 0 30px rgba(95,63,39,.07),
+    0 14px 24px rgba(56,35,20,.18);
+}
+.board.left{left:2%}
+.board.right{right:2%}
+
+/* central binding */
+.spine{
+  position:absolute;
+  left:48.75%;
+  top:6.5%;bottom:6.5%;
+  width:2.5%;
+  border-radius:50%;
+  background:linear-gradient(90deg,rgba(0,0,0,.24),rgba(255,255,255,.12),rgba(0,0,0,.22));
+  z-index:35;
+  pointer-events:none;
+}
+.rings{
+  position:absolute;
+  left:48.15%;
+  top:7%;bottom:7%;
+  width:3.7%;
+  z-index:60;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-evenly;
+  pointer-events:none;
+}
+.rings span{
+  width:72%;
+  height:4.9%;
+  min-height:7px;
+  max-height:15px;
+  border:2px solid #222;
+  border-radius:999px;
+  background:linear-gradient(#757575,#2c2c2c);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.26);
+}
+
+/* base pages under all physical sheets */
+.base-page{
+  position:absolute;
+  top:7.3%;bottom:7.3%;
+  width:44.2%;
+  border-radius:8px;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 2px,transparent 2px 7px),
+    linear-gradient(180deg,var(--black2),var(--black));
+  box-shadow:0 10px 18px rgba(35,20,12,.17);
+}
+.base-page.left{left:4.9%;box-shadow:0 10px 18px rgba(35,20,12,.17),inset -12px 0 18px rgba(0,0,0,.2)}
+.base-page.right{right:4.9%;box-shadow:0 10px 18px rgba(35,20,12,.17),inset 12px 0 18px rgba(0,0,0,.2)}
+
+/* Decorative empty photo areas — NO IMAGES YET */
+.empty-layout{
+  position:absolute;
+  inset:6%;
+  display:grid;
+  grid-template-rows:1fr 1fr;
+  gap:clamp(8px,1.5vw,15px);
+}
+.empty-photo{
+  min-height:0;
+  position:relative;
+  border:1px solid rgba(255,255,255,.11);
+  background:rgba(255,255,255,.025);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);
+}
+.empty-photo::before{
+  content:"";
+  position:absolute;
+  inset:8%;
+  border:1px dashed rgba(255,255,255,.13);
+  border-radius:2px;
+}
+.empty-photo::after{
+  content:"Fotoğraf alanı";
+  position:absolute;
+  left:0;right:0;top:50%;
+  transform:translateY(-50%);
+  text-align:center;
+  color:rgba(255,255,255,.3);
+  font-size:clamp(.55rem,1.5vw,.75rem);
+  letter-spacing:.06em;
+}
+
+
+/* Filled album photo layouts */
+.album-layout{
+  position:absolute;
+  inset:6%;
+  display:grid;
+  grid-template-rows:1fr 1fr;
+  gap:clamp(10px,1.6vw,16px);
+}
+.album-card{
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+}
+.album-photo{
+  position:relative;
+  flex:1 1 auto;
+  width:100%;
+  min-height:0;
+  padding:10px;
+  border:none;
+  border-radius:4px;
+  background:linear-gradient(180deg,#fffdf8,#f4efe5);
+  box-shadow:
+    0 10px 16px rgba(0,0,0,.20),
+    inset 0 1px 0 rgba(255,255,255,.85);
+  cursor:zoom-in;
+}
+.album-card:nth-child(odd) .album-photo{transform:rotate(-1.05deg)}
+.album-card:nth-child(even) .album-photo{transform:rotate(.75deg)}
+.album-photo::before,
+.album-photo::after{
+  content:"";
+  position:absolute;
+  width:22px;
+  height:22px;
+  background:rgba(0,0,0,.72);
+  clip-path:polygon(0 0,100% 0,0 100%);
+  z-index:2;
+}
+.album-photo::before{top:0;left:0}
+.album-photo::after{top:0;right:0;transform:scaleX(-1)}
+.album-photo .corner-bl,
+.album-photo .corner-br{
+  position:absolute;
+  bottom:0;
+  width:22px;
+  height:22px;
+  background:rgba(0,0,0,.72);
+  clip-path:polygon(0 100%,100% 100%,0 0);
+  z-index:2;
+  pointer-events:none;
+}
+.album-photo .corner-bl{left:0}
+.album-photo .corner-br{right:0;transform:scaleX(-1)}
+.album-photo img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#151515;
+  border-radius:2px;
+}
+.album-end{
+  flex:1 1 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:16px;
+  border:1px dashed rgba(255,255,255,.13);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);
+  background:rgba(255,255,255,.035);
+  color:rgba(255,255,255,.86);
+  font-family:Georgia,"Times New Roman",serif;
+}
+.album-end .inner{max-width:78%}
+.album-end .mini{
+  display:block;
+  margin-bottom:10px;
+  color:rgba(255,255,255,.55);
+  text-transform:uppercase;
+  letter-spacing:.18em;
+  font-size:clamp(.55rem,1.25vw,.72rem);
+}
+.album-end strong{
+  display:block;
+  margin-top:9px;
+  font-size:clamp(1rem,2.1vw,1.35rem);
+  font-weight:400;
+}
+.lightbox{
+  position:fixed;
+  inset:0;
+  z-index:900;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(8,10,15,.78);
+  backdrop-filter:blur(5px);
+}
+.lightbox.show{display:flex}
+.lightbox-inner{
+  position:relative;
+  width:min(92vw,980px);
+  max-height:90vh;
+  padding:14px;
+  border-radius:18px;
+  background:rgba(255,250,242,.96);
+  box-shadow:0 18px 48px rgba(0,0,0,.35);
+}
+.lightbox img{
+  display:block;
+  width:100%;
+  max-height:calc(90vh - 28px);
+  object-fit:contain;
+  border-radius:12px;
+  background:#101010;
+}
+.lightbox-close{
+  position:absolute;
+  right:8px;
+  top:8px;
+  width:36px;height:36px;
+  border:none;border-radius:999px;
+  background:rgba(0,0,0,.68);
+  color:#fff;
+  font-size:1.2rem;
+  cursor:pointer;
+}
+@media(max-width:700px){
+  .album-layout{gap:8px}
+  .album-photo{padding:7px}
+  .album-photo::before,.album-photo::after,.album-photo .corner-bl,.album-photo .corner-br{width:16px;height:16px}
+  .album-end{padding:10px}
+  .album-end .mini{font-size:clamp(.44rem,1.15vw,.52rem); margin-bottom:6px}
+  .album-end strong{font-size:clamp(.76rem,1.8vw,.96rem); margin-top:5px}
+}
+
+/* Intro text pages */
+.text-layout{
+  position:absolute;
+  inset:6.5%;
+}
+.text-paper{
+  position:absolute;
+  inset:0;
+  border-radius:10px;
+  padding:clamp(12px,2vw,24px);
+  background:
+    repeating-linear-gradient(0deg,rgba(107,76,50,.035) 0 1px,transparent 1px 22px),
+    linear-gradient(180deg,#f8f2e8,#ebdfcf);
+  color:#6f5c4a;
+  box-shadow:
+    0 8px 14px rgba(0,0,0,.15),
+    inset 0 0 0 1px rgba(118,85,56,.11);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.text-paper h3{
+  margin:0 0 10px;
+  text-align:center;
+  color:#6b4f37;
+  font-family:Georgia,"Times New Roman",serif;
+  font-weight:400;
+  font-size:clamp(1.05rem,2.6vw,1.7rem);
+  line-height:1.08;
+}
+.text-content{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  font-size:clamp(.56rem,1.45vw,.82rem);
+  line-height:1.58;
+  overflow:hidden;
+}
+.text-content p{
+  margin:0;
+}
+.text-num{
+  margin-top:auto;
+  text-align:right;
+  color:rgba(111,92,74,.55);
+  font-size:clamp(.58rem,1.2vw,.72rem);
+  letter-spacing:.08em;
+}
+
+.intro-card{
+  position:absolute;
+  inset:4.9%;
+  border-radius:16px;
+  padding:clamp(13px,1.8vw,22px);
+  background:
+    radial-gradient(circle at top left,rgba(255,255,255,.38),transparent 22%),
+    linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 18%),
+    repeating-linear-gradient(0deg,rgba(121,90,60,.028) 0 1px,transparent 1px 20px),
+    linear-gradient(180deg,#fbf7ef,#eee3d3);
+  color:#6e5b49;
+  box-shadow:
+    0 10px 18px rgba(0,0,0,.14),
+    inset 0 0 0 1px rgba(124,91,61,.10);
+  overflow:hidden;
+  display:grid;
+  grid-template-rows:auto auto 1fr auto;
+  gap:0;
+}
+.intro-card::before{
+  content:"";
+  position:absolute;
+  inset:11px;
+  border-radius:11px;
+  border:1px solid rgba(138,107,79,.10);
+  pointer-events:none;
+}
+.intro-flower{
+  position:relative;
+  text-align:center;
+  font-size:clamp(.82rem,1.8vw,1.05rem);
+  line-height:1;
+  margin-bottom:4px;
+  opacity:.78;
+}
+.intro-kicker{
+  position:relative;
+  text-align:center;
+  color:#967760;
+  font-size:clamp(.45rem,.95vw,.60rem);
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  margin-bottom:5px;
+}
+.intro-title{
+  position:relative;
+  margin:0 0 9px;
+  text-align:center;
+  color:#744f36;
+  font-family:Georgia,"Times New Roman",serif;
+  font-weight:400;
+  font-size:clamp(1.05rem,2.05vw,1.45rem);
+  line-height:1.02;
+}
+.intro-body{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  font-size:clamp(.50rem,.98vw,.64rem);
+  line-height:1.42;
+  text-align:left;
+  word-spacing:normal;
+  overflow:hidden;
+}
+.intro-body p{
+  margin:0;
+}
+
+.intro-photo{
+  position:relative;
+  width:79%;
+  aspect-ratio:16/9;
+  margin:4px auto 12px;
+  padding:5px;
+  flex:0 0 auto;
+  background:#fffaf2;
+  border:1px solid rgba(121,91,65,.13);
+  border-radius:8px;
+  box-shadow:
+    0 7px 13px rgba(59,39,25,.15),
+    inset 0 1px 0 rgba(255,255,255,.76);
+  transform:rotate(-.45deg);
+}
+.intro-photo img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:4px;
+}
+.intro-card.with-photo{
+  display:flex;
+  flex-direction:column;
+}
+.intro-card.with-photo .intro-body{
+  font-size:clamp(.48rem,.92vw,.61rem);
+  line-height:1.42;
+  gap:8px;
+}
+.intro-card.continuation{
+  display:flex;
+  flex-direction:column;
+}
+.intro-card.continuation .intro-body{
+  flex:1 1 auto;
+  font-size:clamp(.46rem,.90vw,.59rem);
+  line-height:1.38;
+  gap:8px;
+}
+.intro-soft-quote{
+  margin-top:auto;
+  padding:9px 11px;
+  border-radius:10px;
+  background:rgba(255,255,255,.40);
+  border:1px solid rgba(129,96,70,.11);
+  text-align:center;
+  color:#7a5a40;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(.56rem,.98vw,.69rem);
+  line-height:1.32;
+}
+.intro-quote{
+  margin-top:8px;
+  padding:8px 10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.36);
+  border:1px solid rgba(129,96,70,.11);
+  text-align:center;
+  color:#7a5a40;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(.55rem,1.02vw,.70rem);
+  line-height:1.35;
+}
+.intro-signoff{
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid rgba(125,97,72,.13);
+  text-align:center;
+  color:#7a5b42;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(.58rem,1.06vw,.76rem);
+  line-height:1.33;
+}
+.intro-side-left .intro-title,
+.intro-side-right .intro-title{
+  margin-bottom:8px;
+}
+
+@media(max-width:700px){
+  .intro-card{
+    inset:4.5%;
+    padding:10px;
+    border-radius:13px;
+  }
+  .intro-card::before{inset:8px}
+  .intro-flower{
+    font-size:clamp(.72rem,2vw,.9rem);
+    margin-bottom:2px;
+  }
+  .intro-kicker{
+    font-size:clamp(.40rem,1.28vw,.52rem);
+    letter-spacing:.18em;
+    margin-bottom:4px;
+  }
+  .intro-title{
+    font-size:clamp(.80rem,2vw,.98rem);
+    margin-bottom:6px;
+  }
+  .intro-body{
+    font-size:clamp(.40rem,.95vw,.50rem);
+    line-height:1.27;
+    gap:5px;
+  }
+  .intro-photo{
+    width:82%;
+    margin:1px auto 8px;
+    padding:4px;
+  }
+  .intro-card.with-photo .intro-body{
+    font-size:clamp(.39rem,.88vw,.49rem);
+    line-height:1.28;
+    gap:5px;
+  }
+  .intro-card.continuation .intro-body{
+    font-size:clamp(.39rem,.90vw,.49rem);
+    line-height:1.26;
+    gap:5px;
+  }
+  .intro-soft-quote{
+    margin-top:auto;
+    padding:6px 7px;
+    font-size:clamp(.42rem,.92vw,.52rem);
+    line-height:1.20;
+  }
+  .intro-quote{
+    margin-top:6px;
+    padding:6px 7px;
+    font-size:clamp(.43rem,.95vw,.52rem);
+    line-height:1.22;
+  }
+  .intro-signoff{
+    margin-top:6px;
+    padding-top:5px;
+    font-size:clamp(.42rem,.95vw,.52rem);
+    line-height:1.2;
+  }
+}
+
+
+/* ============================================================
+   PHYSICAL PAGE LEAVES
+   Each leaf is permanent. It rotates but is never replaced.
+============================================================ */
+.leaf{
+  position:absolute;
+  top:7.3%;bottom:7.3%;
+  left:50%;
+  width:44.2%;
+  transform-origin:left center;
+  transform-style:preserve-3d;
+  will-change:transform;
+  touch-action:none;
+}
+.leaf-face{
+  position:absolute;
+  inset:0;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  border-radius:8px;
+  overflow:hidden;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 2px,transparent 2px 7px),
+    linear-gradient(180deg,var(--black2),var(--black));
+  box-shadow:
+    0 10px 18px rgba(35,20,12,.17),
+    inset 12px 0 18px rgba(0,0,0,.2);
+}
+.leaf-face.back{
+  transform:rotateY(180deg);
+  box-shadow:
+    0 10px 18px rgba(35,20,12,.17),
+    inset -12px 0 18px rgba(0,0,0,.2);
+}
+.leaf-face::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:var(--shade,0);
+  background:linear-gradient(90deg,rgba(0,0,0,.4),transparent 44%,rgba(255,255,255,.12));
+}
+
+/* ============================================================
+   WOODEN COVER — also permanent
+============================================================ */
+.cover{
+  position:absolute;
+  left:50%;
+  top:5%;bottom:5%;
+  width:48%;
+  transform-origin:left center;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+.cover-face{
+  position:absolute;
+  inset:0;
+  border-radius:18px;
+  overflow:hidden;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  background:
+    radial-gradient(circle at 23% 25%,rgba(255,255,255,.18),transparent 12%),
+    radial-gradient(circle at 74% 62%,rgba(255,255,255,.12),transparent 15%),
+    repeating-linear-gradient(94deg,rgba(116,73,40,.13) 0 2px,transparent 2px 66px),
+    linear-gradient(135deg,var(--wood1),var(--wood2) 50%,var(--wood3));
+  box-shadow:
+    inset 0 0 0 1px rgba(99,64,37,.17),
+    inset 0 0 30px rgba(95,63,39,.08),
+    0 15px 25px rgba(55,34,20,.2);
+}
+.cover-face.backside{transform:rotateY(180deg)}
+.cover-label{
+  position:absolute;
+  inset:9%;
+  border:1px solid rgba(106,67,36,.28);
+  border-radius:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#704a2c;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.17);
+}
+.cover-label small{
+  display:block;
+  font-size:clamp(.52rem,1.4vw,.76rem);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  opacity:.72;
+}
+.cover-label h2{
+  margin:9px 0 5px;
+  font-family:Georgia,"Times New Roman",serif;
+  font-weight:400;
+  font-size:clamp(1.8rem,5.6vw,3.9rem);
+  line-height:.96;
+}
+.cover-label .flower{font-size:clamp(1rem,2.6vw,1.6rem)}
+
+.inside-cover{
+  position:absolute;
+  inset:9%;
+  border-radius:11px;
+  background:linear-gradient(180deg,#f7f1e7,#e9dccb);
+  color:#705e4c;
+  box-shadow:
+    0 8px 14px rgba(0,0,0,.12),
+    inset 0 0 0 1px rgba(120,88,58,.11);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:18px;
+}
+.inside-cover h3{
+  margin:0 0 8px;
+  font:400 clamp(1.05rem,3vw,1.8rem) Georgia,"Times New Roman",serif;
+}
+.inside-cover p{
+  margin:0;
+  font-size:clamp(.58rem,1.6vw,.82rem);
+  line-height:1.55;
+}
+
+/* visual turn shadow */
+.turn-shadow{
+  position:absolute;
+  z-index:190;
+  left:45%;
+  top:9%;bottom:9%;
+  width:10%;
+  opacity:0;
+  pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(20,12,7,.27),transparent 70%);
+  filter:blur(10px);
+}
+.turn-shadow.show{opacity:.8}
+
+.hint{
+  position:relative;
+  z-index:5;
+  min-height:46px;
+  margin-top:12px;
+  padding:0 10px;
+  text-align:center;
+  color:#4d7895;
+  font-size:clamp(.7rem,2.2vw,.9rem);
+}
+.dots{
+  display:flex;
+  justify-content:center;
+  gap:7px;
+  margin-top:8px;
+}
+.dot{
+  width:7px;height:7px;border-radius:50%;
+  background:rgba(77,120,149,.23);
+}
+.dot.on{background:#70acd0}
+
+/* optional debug buttons — hidden in normal use */
+.debug{
+  display:none;
+  position:fixed;
+  right:10px;
+  top:10px;
+  z-index:500;
+  gap:5px;
+}
+.debug button{padding:5px}
+
+@media(max-width:700px){
+  .stage{
+    width:99vw;
+    aspect-ratio:1.10/1;
+  }
+  .header{margin-bottom:7px}
+  .leaf,.base-page{top:7.5%;bottom:7.5%;width:44%}
+  .base-page.left{left:5%;opacity:0!important}
+  .board.left{opacity:0!important}
+  .base-page.right{right:5%}
+  .leaf{left:50%}
+  .cover{top:5.2%;bottom:5.2%;width:48%;left:50%}
+  .rings{left:48%;width:4%;top:7.1%;bottom:7.1%}
+}
+</style>
+</head>
+
+<body>
+<button class="back" onclick="history.back()">← Geri</button>
+
+<div class="daisy a" aria-hidden="true">
+  <i class="petal"></i><i class="petal"></i><i class="petal"></i><i class="petal"></i>
+  <i class="petal"></i><i class="petal"></i><i class="petal"></i><i class="petal"></i><i class="center"></i>
+</div>
+<div class="daisy b" aria-hidden="true">
+  <i class="petal"></i><i class="petal"></i><i class="petal"></i><i class="petal"></i>
+  <i class="petal"></i><i class="petal"></i><i class="petal"></i><i class="petal"></i><i class="center"></i>
+</div>
+
+<main class="scene">
+  <header class="header">
+    <h1>Çocukluk Albümü</h1>
+    <p>Albüm tasarımı hazırlandı ve fotoğraflar yerleştirildi. Sayfaları sürükleyerek çevirebilir, fotoğraflara dokunup büyük hâlini görebilirsin.</p>
+  </header>
+
+  <section class="stage" id="stage">
+    <div class="book" id="book">
+
+      <div class="board left" id="leftBoard"></div>
+      <div class="board right"></div>
+
+      <div class="base-page left" id="leftBasePage">
+        <div class="empty-layout">
+          <div class="empty-photo"></div>
+          <div class="empty-photo"></div>
+        </div>
+      </div>
+      <div class="base-page right">
+        <div class="album-layout">
+          <div class="album-card">
+            <div class="album-photo js-lightbox" data-full="album-photo-11.png" role="button" tabindex="0" aria-label="Albüm fotoğrafı 11 büyüt">
+              <img src="album-photo-11.png" alt="Albüm fotoğrafı 11">
+              <span class="corner-bl"></span><span class="corner-br"></span>
+            </div>
+          </div>
+          <div class="album-card">
+            <div class="album-end">
+              <div class="inner">
+                Devamını kendi resimlerimizle dolduracağız,
+                <strong>Seni Seviyorum.</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="spine" id="spine"></div>
+      <div class="rings" id="rings"></div>
+      <div class="turn-shadow" id="turnShadow"></div>
+
+      <!-- These leaves are NEVER replaced. -->
+      <div class="leaf" id="leaf0">
+        <div class="leaf-face front">
+          <div class="text-layout">
+            <div class="intro-card intro-side-right continuation">
+              <div class="intro-flower">🌼</div>
+              <div class="intro-kicker">devamı</div>
+              <div class="intro-body">
+                <p>Geçmişini değiştiremem. Sana yaşamadığın anıları gerçekten veremem ama seni kendi çocukluğumun içine koyup, başka bir evrende belki de böyleydik diyebilirim.</p>
+
+                <p>Bu fotoğraflar belki gerçekten yaşanmış anılar değil. Ama sana baktığımda hissettiğim şey gerçek. Sen benim için gerçekten çok şey ifade ediyorsun. O yüzden seni biraz kendi çocukluğuma kattım.</p>
+
+                <p>Çocukken tanışsaydık salıncak sıramı sana verirdim, bir şeyden korktuğunda da korkma ben buradayım derdim, elimde iki şeker varsa güzel olanı sana ayırırdım, eve giderken biraz daha yanında yürüyebilmek için yolu uzatırdım. Ama şimdi büyüdük, verecek salıncak sıram yok belki ama hayatımda sana vermek istediğim çok güzel ve özel bir yer var.</p>
+
+                <p>Bundan sonrası için yapay zekaya ihtiyacımız olmasın istiyorum. Bundan sonraki fotoğraflarımız gerçekten yaşadığımız anılardan olsun. Bir gün dönüp baktığımızda birbirimizi tanıdığımız günden itibaren ne kadar çok şey biriktirdiğimizi görelim.</p>
+              </div>
+              <div class="intro-signoff">Hayatımın albümünü seninle doldurmak istiyorum.</div>
+            </div>
+          </div>
+        </div>
+        <div class="leaf-face back">
+          <div class="album-layout">
+          <div class="album-card">
+            <div class="album-photo js-lightbox" data-full="album-photo-01.png" role="button" tabindex="0" aria-label="Albüm fotoğrafı 1 büyüt">
+              <img src="album-photo-01.png" alt="Albüm fotoğrafı 1">
+              <span class="corner-bl"></span><span class="corner-br"></span>
+            </div>
+          </div>
+          <div class="album-card">
+            <div class="album-photo js-lightbox" data-full="album-photo-02.png" role="button" tabindex="0" aria-label="Albüm fotoğrafı 2 büyüt">
+              <img src="album-photo-02.png" alt="Albüm fotoğrafı 2">
+              <span class="corner-bl"></span><span class="corner-br"></span>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <div class="leaf" id="leaf1">
+        <div class="leaf-face front">
+          <div class="album-layout">
+          <div class="album-card">
+            <div class="album-photo js-lightbox" data-full="album-photo-03.png" role="button" tabindex="0" aria-label="Albüm fotoğrafı 3 büyüt">
+              <img src="album-photo-03.png" alt="Albüm fotoğrafı 3">
+              <span class="corner-bl"></span><span class="corner-br"></span>
+            </div>
+          </div>
+          <div class="album-card">
+            <div class="album-photo js-lightbox" data-full="album-photo-04.png" role="button" tabindex="0" aria-label="Albüm fotoğrafı 4 büyüt">
+              <img src="album-photo-04.png" alt="Albüm fotoğrafı 4">
+              <span class="corner-bl"></span><span class="corner-br"></span>
+            </div>
+          </div>
+        </div>
+        </div>
+        <div class="leaf-face back">
+          <div class="album-layout">
+          <div class="album-card">
+            <div class="album-photo js-lightbox" data-full="album-photo-05.png" role="button" tabindex="0" aria-label="Albüm fotoğrafı 5 büyüt">
+              <img src="album-photo-05.png" alt="Albüm fotoğrafı 5">
+              <span class="corner-bl"></span><span class="corner-br"></span>
+            </div>
+          </div>
+          <div class="album-card">
+            <div class="album-photo js-lightbox" data-full="album-photo-06.png" role="button" tabindex="0" aria-label="Albüm fotoğrafı 6 büyüt">
+              <img src="album-photo-06.png" alt="Albüm fotoğrafı 6">
+              <span class="corner-bl"></span><span class="corner-br"></span>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <div class="leaf" id="leaf2">
+        <div class="leaf-face front">
+          <div class="album-layout">
+          <div class="album-card">
+            <div class="album-photo js-lightbox" data-full="album-photo-07.png" role="button" tabindex="0" aria-label="Albüm fotoğrafı 7 büyüt">
+              <img src="album-photo-07.png" alt="Albüm fotoğrafı 7">
+              <span class="corner-bl"></span><span class="corner-br"></span>
+            </div>
+          </div>
+          <div class="album-card">
+            <div class="album-photo js-lightbox" data-full="album-photo-08.png" role="button" tabindex="0" aria-label="Albüm fotoğrafı 8 büyüt">
+              <img src="album-photo-08.png" alt="Albüm fotoğrafı 8">
+              <span class="corner-bl"></span><span class="corner-br"></span>
+            </div>
+          </div>
+        </div>
+        </div>
+        <div class="leaf-face back">
+          <div class="album-layout">
+          <div class="album-card">
+            <div class="album-photo js-lightbox" data-full="album-photo-09.png" role="button" tabindex="0" aria-label="Albüm fotoğrafı 9 büyüt">
+              <img src="album-photo-09.png" alt="Albüm fotoğrafı 9">
+              <span class="corner-bl"></span><span class="corner-br"></span>
+            </div>
+          </div>
+          <div class="album-card">
+            <div class="album-photo js-lightbox" data-full="album-photo-10.png" role="button" tabindex="0" aria-label="Albüm fotoğrafı 10 büyüt">
+              <img src="album-photo-10.png" alt="Albüm fotoğrafı 10">
+              <span class="corner-bl"></span><span class="corner-br"></span>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <!-- The cover is also NEVER removed. -->
+      <div class="cover" id="cover">
+        <div class="cover-face frontside">
+          <div class="cover-label">
+            <div>
+              <small>Biraz gecikmiş birkaç anı</small>
+              <h2>Çocukluk<br>Albümü</h2>
+              <div class="flower">🌼</div>
+            </div>
+          </div>
+        </div>
+        <div class="cover-face backside">
+          <div class="intro-card intro-side-left with-photo">
+            <div class="intro-flower">🌼</div>
+            <div class="intro-kicker">başlamadan önce</div>
+            <h3 class="intro-title">Senin için</h3>
+
+            <div class="intro-photo">
+              <img src="giris-fotografi.jpeg" alt="Birlikte çekilmiş fotoğraf">
+            </div>
+
+            <div class="intro-body">
+              <p>Elinde çocukluğundan yalnızca bir fotoğraf olduğunu öğrendiğimde bunu uzun süre düşündüm. Her çocuğun büyüdüğünde dönüp bakabileceği anıları olmalı bence. Koşarken, gülerken, saçma bir poz verirken, hiçbir şeyden haberi yokken çekilmiş fotoğrafları.</p>
+
+              <p>Senin o yıllarından geriye yalnızca bir fotoğraf kaldığını öğrenince keşke biraz daha fazlası olsaydı diye düşündüm. Madem geçmişe dönüp seni o yıllarda gerçekten tanıyıp göremiyorum, ben de seni kendi çocukluğuma eklemek istedim.</p>
+            </div>
+
+            <div class="intro-soft-quote">Bazı insanlar hayatına geç girer ama insan onları tanıyınca sanki daha önce de hayatında olmalıymış gibi hissettirir.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="hint" id="hint">
+    Kapağın sağ tarafından tutup sola doğru sürükle.
+    <div class="dots" id="dots"></div>
+  </div>
+</main>
+
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Kapat">×</button>
+    <img id="lightboxImage" src="" alt="Büyük fotoğraf">
+  </div>
+</div>
+
+<script>
+const stage = document.getElementById("stage");
+const book = document.getElementById("book");
+const cover = document.getElementById("cover");
+const leftBoard = document.getElementById("leftBoard");
+const leftBasePage = document.getElementById("leftBasePage");
+const spine = document.getElementById("spine");
+const rings = document.getElementById("rings");
+const shadow = document.getElementById("turnShadow");
+const hint = document.getElementById("hint");
+const dots = document.getElementById("dots");
+
+const leaves = [
+  document.getElementById("leaf0"),
+  document.getElementById("leaf1"),
+  document.getElementById("leaf2")
+];
+
+rings.innerHTML =
+  Array.from({length:15},()=>"<span></span>").join("");
+
+let open = 0;          // 0 closed, 1 open
+let turned = 0;        // number of pages already turned
+let drag = null;
+const lightbox = document.getElementById("lightbox");
+const lightboxImage = document.getElementById("lightboxImage");
+const lightboxClose = document.getElementById("lightboxClose");
+
+function openLightbox(src, altText){
+  lightboxImage.src = src;
+  lightboxImage.alt = altText || "Büyük fotoğraf";
+  lightbox.classList.add("show");
+  lightbox.setAttribute("aria-hidden","false");
+}
+function closeLightbox(){
+  lightbox.classList.remove("show");
+  lightbox.setAttribute("aria-hidden","true");
+  lightboxImage.src = "";
+}
+document.querySelectorAll(".js-lightbox").forEach(item=>{
+  item.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    const img = item.querySelector("img");
+    openLightbox(item.dataset.full || img.src, img?.alt || "Albüm fotoğrafı");
+  });
+  item.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      const img = item.querySelector("img");
+      openLightbox(item.dataset.full || img.src, img?.alt || "Albüm fotoğrafı");
+    }
+  });
+});
+lightboxClose.addEventListener("click", closeLightbox);
+lightbox.addEventListener("click", (e)=>{
+  if(e.target === lightbox) closeLightbox();
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape" && lightbox.classList.contains("show")) closeLightbox();
+});
+
+
+const restingZ = [90,80,70];
+
+function setupLayers(){
+  leaves.forEach((leaf,i)=>{
+    leaf.style.zIndex = String(restingZ[i]);
+  });
+
+  // During opening the cover must be on top.
+  // Once fully open it stays physically present on the left,
+  // underneath any pages that are subsequently turned onto it.
+  cover.style.zIndex = open >= .995 ? "55" : "130";
+
+  // Turned leaves stack above the opened cover on the left.
+  for(let i=0;i<turned;i++){
+    leaves[i].style.zIndex = String(200+i);
+  }
+}
+
+function applyBook(){
+  // Closed book = only the front cover is visible and centered.
+  // Open book = the full two-page spread is centered.
+  const shift = -24 * (1-open);
+  book.style.transform = `translateX(${shift}%)`;
+  cover.style.transform = `rotateY(${-178*open}deg)`;
+
+  // IMPORTANT PHYSICAL BEHAVIOUR:
+  // While opening the FRONT COVER, an interior left page must not suddenly appear.
+  // The front cover itself rotates to the left and its BACK SIDE becomes the left side.
+  // Therefore these permanent left-side fallback layers stay hidden.
+  leftBoard.style.opacity = "0";
+  leftBasePage.style.opacity = "0";
+
+  // The binding belongs to the book block, so it can appear progressively
+  // as the cover exposes the hinge.
+  const bindingReveal = Math.max(0, Math.min(1, (open - 0.08) / 0.32));
+  spine.style.opacity = String(Math.max(0.12, bindingReveal));
+  rings.style.opacity = String(Math.max(0.18, bindingReveal));
+
+  // Cover dominates while opening/closing. When open, it remains
+  // as the real left cover beneath any subsequently turned pages.
+  cover.style.zIndex = open < .995 ? "130" : "55";
+
+  updateHint();
+}
+
+function updateHint(){
+  let text;
+  if(open < .995){
+    text = "Kapağın sağ tarafından tutup sola doğru sürükle.";
+  }else if(turned===0){
+    text = "Sağdaki sayfanın dış kenarını sola doğru sürükleyerek çevir. Kapağı kapatmak için soldan sağa sürükleyebilirsin.";
+  }else if(turned===leaves.length){
+    text = "Son sayfadasın. Önceki sayfaya dönmek için sol dış kenarı sağa doğru sürükle.";
+  }else{
+    text = "Sayfayı dış kenarından tutup sürükle. Geri dönmek için sol kenarı sağa çek.";
+  }
+  hint.childNodes[0].nodeValue = text+" ";
+  dots.innerHTML = Array.from({length:leaves.length+1},(_,i)=>
+    `<span class="dot ${i===turned?"on":""}"></span>`
+  ).join("");
+}
+
+function point(e){
+  const r=stage.getBoundingClientRect();
+  return {x:e.clientX-r.left,y:e.clientY-r.top,w:r.width,h:r.height};
+}
+
+function setLeafAngle(index, angle){
+  leaves[index].style.transform = `rotateY(${angle}deg)`;
+
+  const p=Math.min(1,Math.abs(angle)/178);
+  const front=leaves[index].querySelector(".front");
+  const back=leaves[index].querySelector(".back");
+  front.style.setProperty("--shade",String(.08+.38*p));
+  back.style.setProperty("--shade",String(.42-.30*p));
+}
+
+function startCover(e,p){
+  // opening: visible right half
+  if(open<.995 && p.x>p.w*.48){
+    drag={kind:"cover",pointerId:e.pointerId,startX:p.x,startOpen:open};
+    cover.style.zIndex="130";
+    stage.setPointerCapture(e.pointerId);
+    return true;
+  }
+
+  // closing only when no pages have been turned
+  if(open>.995 && turned===0 && p.x<p.w*.50){
+    drag={kind:"cover",pointerId:e.pointerId,startX:p.x,startOpen:open};
+    cover.style.zIndex="130";
+    stage.setPointerCapture(e.pointerId);
+    return true;
+  }
+  return false;
+}
+
+function startPage(e,p){
+  if(open<.995) return false;
+
+  // forward from right outside edge
+  if(p.x>p.w*.84 && turned<leaves.length){
+    const index=turned;
+    leaves[index].style.zIndex=String(300+index);
+    drag={
+      kind:"page",
+      dir:"forward",
+      index,
+      pointerId:e.pointerId,
+      startX:p.x,
+      startAngle:0,
+      progress:0
+    };
+    shadow.classList.add("show");
+    stage.setPointerCapture(e.pointerId);
+    return true;
+  }
+
+  // backward from left outside edge
+  if(p.x<p.w*.16 && turned>0){
+    const index=turned-1;
+    leaves[index].style.zIndex=String(300+index);
+    drag={
+      kind:"page",
+      dir:"backward",
+      index,
+      pointerId:e.pointerId,
+      startX:p.x,
+      startAngle:-178,
+      progress:0
+    };
+    shadow.classList.add("show");
+    stage.setPointerCapture(e.pointerId);
+    return true;
+  }
+  return false;
+}
+
+stage.addEventListener("pointerdown",e=>{
+  const p=point(e);
+  if(startCover(e,p) || startPage(e,p)){
+    e.preventDefault();
+  }
+});
+
+stage.addEventListener("pointermove",e=>{
+  if(!drag || drag.pointerId!==e.pointerId) return;
+  const p=point(e);
+
+  if(drag.kind==="cover"){
+    let value=drag.startOpen+(drag.startX-p.x)/(p.w*.54);
+    open=Math.max(0,Math.min(1,value));
+    applyBook();
+    e.preventDefault();
+    return;
+  }
+
+  if(drag.dir==="forward"){
+    let prog=(drag.startX-p.x)/(p.w*.58);
+    prog=Math.max(0,Math.min(1,prog));
+    drag.progress=prog;
+    setLeafAngle(drag.index,-178*prog);
+  }else{
+    let prog=(p.x-drag.startX)/(p.w*.58);
+    prog=Math.max(0,Math.min(1,prog));
+    drag.progress=prog;
+    setLeafAngle(drag.index,-178*(1-prog));
+  }
+  e.preventDefault();
+});
+
+function release(e){
+  if(!drag || drag.pointerId!==e.pointerId) return;
+
+  if(drag.kind==="cover"){
+    const target=open>=.5?1:0;
+    open=target;
+
+    book.style.transition="transform .48s cubic-bezier(.2,.8,.2,1)";
+    cover.style.transition="transform .48s cubic-bezier(.2,.8,.2,1)";
+    spine.style.transition="opacity .48s ease";
+    rings.style.transition="opacity .48s ease";
+    applyBook();
+
+    setTimeout(()=>{
+      book.style.transition="";
+      cover.style.transition="";
+      spine.style.transition="";
+      rings.style.transition="";
+      setupLayers();
+    },500);
+
+    try{stage.releasePointerCapture(e.pointerId)}catch(_){}
+    drag=null;
+    return;
+  }
+
+  const {index,dir,progress}=drag;
+  const complete=progress>=.46;
+  const leaf=leaves[index];
+
+  leaf.style.transition="transform .46s cubic-bezier(.2,.78,.2,1)";
+
+  if(dir==="forward"){
+    setLeafAngle(index,complete?-178:0);
+  }else{
+    setLeafAngle(index,complete?0:-178);
+  }
+
+  // IMPORTANT:
+  // Nothing gets deleted, recreated, swapped, or re-rendered here.
+  // The same physical leaf simply stays at its final angle.
+  setTimeout(()=>{
+    leaf.style.transition="";
+    if(complete){
+      if(dir==="forward") turned++;
+      else turned--;
+    }
+
+    // Restore permanent stack values after the motion.
+    setupLayers();
+    shadow.classList.remove("show");
+    updateHint();
+  },480);
+
+  try{stage.releasePointerCapture(e.pointerId)}catch(_){}
+  drag=null;
+}
+
+stage.addEventListener("pointerup",release);
+stage.addEventListener("pointercancel",release);
+
+/* Debug states for quick visual testing:
+   ?debug=open
+   ?debug=page1
+   ?debug=page2
+*/
+const q=new URLSearchParams(location.search).get("debug");
+if(q==="open"){open=1}
+if(q==="page1"){open=1;turned=1;setLeafAngle(0,-178)}
+if(q==="page2"){open=1;turned=2;setLeafAngle(0,-178);setLeafAngle(1,-178)}
+
+setupLayers();
+applyBook();
+updateHint();
+</script>
+</body>
+</html>
